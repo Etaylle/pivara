@@ -678,7 +678,7 @@ export default function BreweryApp() {
   position: relative;
   width: 100%;
   aspect-ratio: 3 / 1; /* oder 7616 / 2560 */
-  background-image: url('/your-image.jpeg');
+  background-image: url('/small.jpeg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
