@@ -674,14 +674,18 @@ export default function BreweryApp() {
         .text-shadow {
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
-        .header-container {
-          position: relative;
-          background-image: url('/small.jpeg');
-          background-size: cover;
-          background-position: center;
-          background-blend-mode: overlay;
-          backdrop-filter: blur(10px);
-        }
+       .header-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 1; /* oder 7616 / 2560 */
+  background-image: url('/your-image.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-blend-mode: overlay;
+  filter: brightness(0.75);
+  overflow: hidden;
+}
         .header-container::before {
           content: '';
           position: absolute;
