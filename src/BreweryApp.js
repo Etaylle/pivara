@@ -699,40 +699,40 @@ export default function BreweryApp() {
       <div className="grain-pattern dark:opacity-20"></div>
       
       {/* Hero Section with Brewery Panorama */}
-<div className="hero-section">
-  <img 
-    src="/panorama.jpeg"
-    alt="Vienna Brewery Panorama" 
-    className="hero-image"
-  />
-  <div className="hero-overlay"></div>
-  <div className={`hero-content ${animateHero ? 'animate' : ''}`}>
-    <h1 className={`text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight ${theme.gradientText} font-['Playfair_Display']`}>
-      {t.title}
-    </h1>
-    <p className="text-2xl text-amber-100 mb-8 italic font-['Inter']">{t.slogan}</p>
-    <div className="flex flex-wrap justify-center gap-4 mb-8">
-      <div className="badge">
-        <Droplets size={20} />
-        {t.brewingSince}
+      <div className="hero-section">
+        <img 
+          src="https://github.com/Etaylle/fh-brauerei/blob/f16344b96fe70020fdc46161ae1b752b64b71225/public/panorama.jpeg" 
+          alt="Vienna Brewery Panorama" 
+          className="hero-image"
+        />
+        <div className="hero-overlay"></div>
+        <div className={`hero-content ${animateHero ? 'animate' : ''}`}>
+          <h1 className={`text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight ${theme.gradientText} font-['Playfair_Display']`}>
+            {t.title}
+          </h1>
+          <p className="text-2xl text-amber-100 mb-8 italic font-['Inter']">{t.slogan}</p>
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            <div className="badge">
+              <Droplets size={20} />
+              {t.brewingSince}
+            </div>
+            <div className="badge">
+              <Wheat size={20} />
+              {t.qualityPromise}
+            </div>
+            <div className="badge">
+              <Award size={20} />
+              {t.awardWinning}
+            </div>
+          </div>
+          <button 
+            className="cta-button" 
+            onClick={() => document.getElementById('brewData').scrollIntoView({ behavior: 'smooth' })}
+          >
+            {t.viewProcess}
+          </button>
+        </div>
       </div>
-      <div className="badge">
-        <Wheat size={20} />
-        {t.qualityPromise}
-      </div>
-      <div className="badge">
-        <Award size={20} />
-        {t.awardWinning}
-      </div>
-    </div>
-    <button 
-      className="cta-button" 
-      onClick={() => document.getElementById('brewData').scrollIntoView({ behavior: 'smooth' })}
-    >
-      {t.viewProcess}
-    </button>
-  </div>
-</div>
       
       {/* Sticky Header with Background Image */}
       <header className={`sticky top-0 z-50 ${theme.bgHeader} text-white shadow-lg transition-all duration-300 glass-effect header-container`}>
