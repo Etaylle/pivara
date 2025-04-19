@@ -706,7 +706,7 @@ export default function BreweryApp() {
       <div className="grain-pattern dark:opacity-20"></div>
       
       {/* Hero Section with Brewery Panorama */}
-      <div className="hero-section">
+      <div className="hero-section relative overflow-hidden">
   <div 
     className="hero-image"
     style={{
@@ -715,18 +715,17 @@ export default function BreweryApp() {
       left: 0,
       width: '100%',
       height: '100%',
-      
-      backgroundImage: 'url("/panorama.jpeg")',
+      backgroundImage: 'url("/panorama.jpeg")', // safer with leading slash
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       filter: 'brightness(0.7)',
       transform: 'scale(1.05)',
       transition: 'transform 10s ease-in-out',
-      zIndex: -1
+      zIndex: 0 // or 1
     }}
-  ></div>
-  <div className="hero-overlay"></div>
-  <div className={`hero-content ${animateHero ? 'animate' : ''}`}>
+  />
+  <div className="hero-overlay z-10 relative"></div>
+  <div className={`hero-content ${animateHero ? 'animate' : ''} relative z-20`}>
     <h1 className={`text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight ${theme.gradientText} font-['Playfair_Display']`}>
       {t.title}
     </h1>
