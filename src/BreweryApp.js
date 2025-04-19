@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Timer, Thermometer, ArrowUp, Star, GlassWater, Sun, Moon, Share2, Globe, QrCode, Calendar, ArrowLeft, ArrowRight, Droplets, Grain, Award } from 'lucide-react';
+import { Timer, Thermometer, ArrowUp, Star, GlassWater, Sun, Moon, Share2, Globe, QrCode, Calendar, ArrowLeft, ArrowRight, Droplets, Wheat, Award } from 'lucide-react';
 
 // Simuliere Live-Daten
 const generateMockData = (timeOffset = 0) => {
@@ -782,7 +782,7 @@ export default function BreweryApp() {
               {t.brewingSince}
             </div>
             <div className="badge">
-              <Grain size={20} />
+              <Wheat size={20} />
               {t.qualityPromise}
             </div>
             <div className="badge">
