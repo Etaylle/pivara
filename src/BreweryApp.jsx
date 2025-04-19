@@ -674,18 +674,14 @@ export default function BreweryApp() {
         .text-shadow {
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
-       .header-container {
-  position: relative;
-  width: 100%;
-  height: 10vh; 
-  background-image: url('/nova.jpeg'); /* oder '/header.jpg' o.ä. */
-  background-size: cover;
-  background-position: center center;
-  background-repeat: no-repeat;
-  background-blend-mode: overlay;
-  backdrop-filter: blur(10px);
-  z-index: 0;
-}
+        .header-container {
+          position: relative;
+          background-image: url('https://images.unsplash.com/photo-1571690412283-a0b0b3dc1521?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&h=200');
+          background-size: cover;
+          background-position: center;
+          background-blend-mode: overlay;
+          backdrop-filter: blur(10px);
+        }
         .header-container::before {
           content: '';
           position: absolute;
