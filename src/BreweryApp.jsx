@@ -705,28 +705,33 @@ export default function BreweryApp() {
       {/* Decorative Background Elements */}
       <div className="grain-pattern dark:opacity-20"></div>
       
-      {/* Hero Section with Brewery Panorama */}
-      <div className="hero-section relative overflow-hidden">
-      <div 
-  className="relative w-full aspect-[3/1]"
-  style={{
-    backgroundImage: 'url("/panorama.jpeg")',
-    backgroundSize: 'contain', // or 'cover', depending on your preference
-    backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'center',
-    filter: 'brightness(0.7)',
-    transform: 'scale(1.05)',
-    transition: 'transform 10s ease-in-out',
-    zIndex: 0
-  }}
-/>
+{/* Hero Section with Brewery Panorama */}
+<div className="relative w-full h-[70vh] overflow-hidden">
+  {/* Background Image */}
+  <div 
+    className="absolute inset-0"
+    style={{
+      backgroundImage: 'url("/panorama.jpeg")',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      filter: 'brightness(0.7)',
+      transform: 'scale(1.05)',
+      transition: 'transform 10s ease-in-out',
+      zIndex: 0
+    }}
+  />
 
-  <div className="hero-overlay z-10 relative"></div>
-  <div className={`hero-content ${animateHero ? 'animate' : ''} relative z-20`}>
+  {/* Optional Overlay (if needed) */}
+  <div className="absolute inset-0 bg-black bg-opacity-30 z-10"></div>
+
+  {/* Hero Content */}
+  <div className={`relative z-20 flex flex-col items-center justify-center h-full text-center px-4 ${animateHero ? 'animate' : ''}`}>
     <h1 className={`text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight ${theme.gradientText} font-['Playfair_Display']`}>
       {t.title}
     </h1>
     <p className="text-2xl text-amber-100 mb-8 italic font-['Inter']">{t.slogan}</p>
+    
     <div className="flex flex-wrap justify-center gap-4 mb-8">
       <div className="badge">
         <Droplets size={20} />
@@ -741,6 +746,7 @@ export default function BreweryApp() {
         {t.awardWinning}
       </div>
     </div>
+
     <button 
       className="cta-button" 
       onClick={() => document.getElementById('brewData').scrollIntoView({ behavior: 'smooth' })}
@@ -749,6 +755,7 @@ export default function BreweryApp() {
     </button>
   </div>
 </div>
+
       
       {/* Sticky Header with Background Image */}
       <header className={`sticky top-0 z-50 ${theme.bgHeader} text-white shadow-lg transition-all duration-300 glass-effect header-container`}>
