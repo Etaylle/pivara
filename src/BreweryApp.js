@@ -1,9 +1,8 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Timer, Thermometer, ArrowUp, Star, GlassWater, Sun, Moon, Share2, Globe, QrCode, Calendar, ArrowLeft, ArrowRight, Droplets, Wheat, Award } from 'lucide-react';
+import { Timer, Thermometer, ArrowUp, Star, Sun, Moon, Share2, Globe, QrCode, Calendar, ArrowLeft, ArrowRight, Droplets, Wheat, Award } from 'lucide-react';
 
-// Simuliere Live-Daten
+// Simulate Live Data
 const generateMockData = (timeOffset = 0) => {
   const now = new Date();
   now.setMinutes(now.getMinutes() - timeOffset);
@@ -16,14 +15,13 @@ const generateMockData = (timeOffset = 0) => {
   };
 };
 
-// Generiere historische Daten
+// Generate Historical Data
 const generateHistoricalData = (process, day = 0) => {
   const data = [];
   const maxPoints = 24;
   
   for (let i = maxPoints; i >= 0; i--) {
-    const seed = i + (day * 17); // Unterschiedliche Daten für verschiedene Tage
-    
+    const seed = i + (day * 17);
     if (process === 'hopfenkochen') {
       data.push({
         time: `${i*15}min`,
@@ -44,11 +42,10 @@ const generateHistoricalData = (process, day = 0) => {
       });
     }
   }
-  
   return data;
 };
 
-// QR-Code Komponente
+// QR-Code Component
 const QRCodeDisplay = () => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 border border-amber-100 dark:border-amber-900/30">
@@ -58,7 +55,7 @@ const QRCodeDisplay = () => {
   );
 };
 
-// Bier-Glaseffekt Komponente
+// Beer Glass Component
 const BeerGlass = ({ className }) => {
   return (
     <div className={`beer-glass ${className}`}>
@@ -79,18 +76,7 @@ const BeerGlass = ({ className }) => {
   );
 };
 
-// Dekorative Hopfen-Animation
-const HopsAnimation = () => {
-  return (
-    <div className="hops-animation">
-      <div className="hop hop-1"></div>
-      <div className="hop hop-2"></div>
-      <div className="hop hop-3"></div>
-    </div>
-  );
-};
-
-// Hauptkomponente
+// Main Component
 export default function BreweryApp() {
   const [currentData, setCurrentData] = useState([]);
   const [selectedProcess, setSelectedProcess] = useState('live');
@@ -108,9 +94,8 @@ export default function BreweryApp() {
   const [animateHero, setAnimateHero] = useState(false);
   
   const chartRef = useRef(null);
-  const heroRef = useRef(null);
   
-  // Text-Übersetzungen
+  // Text Translations
   const translations = {
     de: {
       title: "FH Brauerei Wien",
@@ -210,7 +195,7 @@ export default function BreweryApp() {
   
   const t = translations[language];
   
-  // Aktuelles Bier
+  // Current Beer
   const currentBeer = {
     name: "Wiener Lager",
     description: language === 'de' ? 
@@ -227,9 +212,8 @@ export default function BreweryApp() {
     awards: ["Vienna Beer Festival 2024", "European Beer Star 2023"]
   };
 
-  // Aktualisiere Live-Daten alle 5 Minuten (simuliert als 5 Sekunden für Demo)
+  // Update Live Data every 5 seconds (simulated for demo)
   useEffect(() => {
-    // Initialisiere mit Datenpunkten
     const initialData = [];
     for (let i = 12; i >= 0; i--) {
       initialData.push(generateMockData(i * 5));
@@ -242,26 +226,24 @@ export default function BreweryApp() {
         setLastUpdated(new Date());
         return newData;
       });
-    }, 5000); // Alle 5 Sekunden für Demo (wäre 5 Minuten in Produktion)
+    }, 5000);
     
     return () => clearInterval(interval);
   }, []);
   
-  // Hero-Animation beim Laden
+  // Hero Animation
   useEffect(() => {
-    setTimeout(() => {
-      setAnimateHero(true);
-    }, 300);
+    setAnimateHero(true);
   }, []);
   
-  // Aktualisiere historische Daten bei Prozessänderung
+  // Update Historical Data on Process Change
   useEffect(() => {
     if (selectedProcess !== 'live') {
       setHistoricalData(generateHistoricalData(selectedProcess, historicalDay));
     }
   }, [selectedProcess, historicalDay]);
   
-  // Dark Mode Einstellungen
+  // Dark Mode Settings
   useEffect(() => {
     if (darkMode) {
       document.body.classList.add('dark-mode');
@@ -270,37 +252,33 @@ export default function BreweryApp() {
     }
   }, [darkMode]);
   
-  // Scroll-Animation für Sektionen
+  // Scroll Animation for Sections
   useEffect(() => {
-    const handleScroll = () => {
-      const sections = document.querySelectorAll('.fade-in-section');
-      sections.forEach(section => {
-        const sectionTop = section.getBoundingClientRect().top;
-        const windowHeight = window.innerHeight;
-        if (sectionTop < windowHeight * 0.85) {
-          section.classList.add('visible');
+    const sections = document.querySelectorAll('.fade-in-section');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
         }
       });
-    };
+    }, { threshold: 0.1 });
     
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial check
+    sections.forEach(section => observer.observe(section));
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => sections.forEach(section => observer.unobserve(section));
   }, []);
   
   // Rating Handler
   const handleRating = (rating) => {
     setUserRating(rating);
-    // In einer echten App würde dies die Bewertung an einen Server senden
-    // Für die Demo aktualisieren wir nur den Durchschnitt
     const newTotal = totalRatings + 1;
     const newAverage = ((averageRating * totalRatings) + rating) / newTotal;
     setTotalRatings(newTotal);
     setAverageRating(newAverage);
   };
   
-  // Teilen-Funktion
+  // Share Function
   const handleShare = (platform) => {
     const shareUrl = window.location.href;
     let shareLink = "";
@@ -328,21 +306,21 @@ export default function BreweryApp() {
     setShowShareOptions(false);
   };
   
-  // Benachrichtigung anzeigen
+  // Show Notification
   const showNotification = (message) => {
     setNotification(message);
     setTimeout(() => setNotification(null), 3000);
   };
   
-  // Wechsle Tag für historische Daten
+  // Change Day for Historical Data
   const changeHistoricalDay = (delta) => {
     setHistoricalDay(prev => {
       const newDay = prev + delta;
-      return newDay >= 0 && newDay <= 6 ? newDay : prev; // Maximal 7 Tage Historie
+      return newDay >= 0 && newDay <= 6 ? newDay : prev;
     });
   };
   
-  // CSS-Klassen für dunklen/hellen Modus
+  // CSS Classes for Dark/Light Mode
   const getThemeClasses = () => {
     return {
       bgMain: darkMode ? 'bg-gradient-to-b from-gray-900 to-amber-950' : 'bg-gradient-to-b from-amber-50 to-amber-200',
@@ -364,7 +342,7 @@ export default function BreweryApp() {
   
   const theme = getThemeClasses();
   
-  // Animation für Datenaktualisierung
+  // Animation for Data Update
   const animateChart = () => {
     if (chartRef.current) {
       chartRef.current.classList.add('pulse-animation');
@@ -383,15 +361,12 @@ export default function BreweryApp() {
   return (
     <div className={`flex flex-col min-h-screen ${theme.bgMain} transition-colors duration-500 overflow-hidden relative`}>
       <style jsx>{`
-        @keyframes float {
-          0% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(5deg); }
-          100% { transform: translateY(0px) rotate(0deg); }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap');
+
         @keyframes pulse {
-          0% { opacity: 0.5; transform: scale(0.98); }
+          0% { opacity: 0.8; transform: scale(0.98); }
           50% { opacity: 1; transform: scale(1.02); }
-          100% { opacity: 0.9; transform: scale(1); }
+          100% { opacity: 0.8; transform: scale(0.98); }
         }
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(20px); }
@@ -401,18 +376,19 @@ export default function BreweryApp() {
           from { opacity: 1; transform: translateY(0); }
           to { opacity: 0; transform: translateY(-20px); }
         }
+        @keyframes rise {
+          0% { transform: translateY(0); opacity: 0.8; }
+          50% { transform: translateY(-100px); opacity: 0.4; }
+          100% { transform: translateY(-200px); opacity: 0; }
+        }
+        @keyframes foam {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(2px); }
+          100% { transform: translateY(0); }
+        }
         @keyframes shine {
           0% { background-position: -100% 0; }
           100% { background-position: 200% 0; }
-        }
-        @keyframes rise {
-          0% { transform: translateY(0) scale(1); opacity: 0; }
-          50% { opacity: 0.8; transform: translateY(-100px) scale(1.1); }
-          100% { transform: translateY(-200px) scale(0.8); opacity: 0; }
-        }
-        @keyframes rotate {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
         }
         
         .pulse-animation {
@@ -424,10 +400,16 @@ export default function BreweryApp() {
         .beer-glass {
           position: relative;
           width: 100%;
-          height: 100%;
+          max-width: 140px;
+          height: 280px;
           border-radius: 16px 16px 12px 12px;
           overflow: hidden;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.2), inset 0 0 10px rgba(255,255,255,0.1);
+          transform: perspective(1000px) rotateX(-5deg);
+          transition: transform 0.3s ease;
+        }
+        .beer-glass:hover {
+          transform: perspective(1000px) rotateX(0deg) scale(1.05);
         }
         .beer-foam {
           position: absolute;
@@ -435,50 +417,38 @@ export default function BreweryApp() {
           left: 0;
           width: 100%;
           height: 25%;
-          background: linear-gradient(to bottom, #fff, #f5f5f4);
+          background: linear-gradient(to bottom, #fff 20%, #f5f5f4 100%);
           border-radius: 16px 16px 0 0;
           z-index: 1;
           box-shadow: inset 0 -5px 15px -5px rgba(0,0,0,0.1);
-        }
-        .beer-foam::before,
-        .beer-foam::after {
-          content: '';
-          position: absolute;
-          bottom: -10px;
-          width: 40%;
-          height: 20px;
-          background: #f5f5f4;
-          border-radius: 50%;
-        }
-        .beer-foam::before {
-          left: 10%;
-        }
-        .beer-foam::after {
-          right: 10%;
+          animation: foam 6s infinite ease-in-out;
         }
         .beer-foam-bubble {
           position: absolute;
           background: rgba(255,255,255,0.9);
           border-radius: 50%;
-          box-shadow: 0 0 10px rgba(255,255,255,0.8);
+          animation: foam 4s infinite ease-in-out;
         }
         .beer-foam-bubble-1 {
-          width: 30px;
-          height: 20px;
-          top: 20%;
-          left: 20%;
+          width: 20px;
+          height: 15px;
+          top: 15%;
+          left: 25%;
+          animation-delay: 0.2s;
         }
         .beer-foam-bubble-2 {
-          width: 25px;
-          height: 15px;
-          top: 40%;
+          width: 15px;
+          height: 10px;
+          top: 30%;
           left: 50%;
+          animation-delay: 0.5s;
         }
         .beer-foam-bubble-3 {
-          width: 35px;
-          height: 25px;
-          top: 30%;
-          right: 25%;
+          width: 25px;
+          height: 20px;
+          top: 20%;
+          right: 20%;
+          animation-delay: 0.8s;
         }
         .beer-liquid {
           position: absolute;
@@ -486,53 +456,23 @@ export default function BreweryApp() {
           left: 0;
           width: 100%;
           height: 75%;
-          background: radial-gradient(circle at center, #f59e0b, #d97706);
+          background: radial-gradient(circle at 50% 30%, #f59e0b 20%, #d97706 100%);
           z-index: 0;
-          animation: bubbles 4s infinite ease-in;
-          box-shadow: inset 0px -10px 30px -10px rgba(0,0,0,0.5);
+          box-shadow: inset 0 -10px 30px -10px rgba(0,0,0,0.5);
         }
         .beer-bubble {
           position: absolute;
-          background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
-          border-radius: 50%;
-          animation: rise 4s infinite ease-out;
-          box-shadow: 0 0 4px rgba(255,255,255,0.6);
-        }
-        .beer-bubble-1 {
-          left: 20%;
-          width: 8px;
-          height: 8px;
           bottom: 5%;
-          animation-delay: 0.2s;
+          background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.9), rgba(255,255,255,0.3));
+          border-radius: 50%;
+          animation: rise 4s infinite ease-in;
+          box-shadow: 0 0 6px rgba(255,255,255,0.7);
         }
-        .beer-bubble-2 {
-          left: 60%;
-          width: 12px;
-          height: 12px;
-          bottom: 8%;
-          animation-delay: 1s;
-        }
-        .beer-bubble-3 {
-          left: 80%;
-          width: 6px;
-          height: 6px;
-          bottom: 12%;
-          animation-delay: 0.5s;
-        }
-        .beer-bubble-4 {
-          left: 35%;
-          width: 10px;
-          height: 10px;
-          bottom: 15%;
-          animation-delay: 1.5s;
-        }
-        .beer-bubble-5 {
-          left: 50%;
-          width: 7px;
-          height: 7px;
-          bottom: 20%;
-          animation-delay: 0.8s;
-        }
+        .beer-bubble-1 { left: 15%; width: 10px; height: 10px; animation-delay: 0s; }
+        .beer-bubble-2 { left: 35%; width: 8px; height: 8px; animation-delay: 0.8s; }
+        .beer-bubble-3 { left: 55%; width: 6px; height: 6px; animation-delay: 1.2s; }
+        .beer-bubble-4 { left: 75%; width: 9px; height: 9px; animation-delay: 0.4s; }
+        .beer-bubble-5 { left: 25%; width: 7px; height: 7px; animation-delay: 1.6s; }
         .beer-highlight {
           position: absolute;
           top: 10%;
@@ -543,21 +483,19 @@ export default function BreweryApp() {
           border-radius: 50%;
           transform: rotate(-20deg);
         }
-        
         .notification {
           position: fixed;
           bottom: 20px;
           left: 50%;
           transform: translateX(-50%);
           padding: 12px 20px;
-          background-color: rgba(0,0,0,0.8);
+          background: rgba(0,0,0,0.8);
           color: white;
           border-radius: 8px;
           z-index: 1000;
           animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
           backdrop-filter: blur(8px);
         }
-        
         .grain-pattern {
           position: absolute;
           top: 0;
@@ -568,7 +506,6 @@ export default function BreweryApp() {
           opacity: 0.6;
           z-index: -1;
         }
-        
         .hero-section {
           position: relative;
           min-height: 400px;
@@ -609,15 +546,12 @@ export default function BreweryApp() {
           padding: 2rem;
           max-width: 800px;
           z-index: 1;
-          opacity: 0;
-          transform: translateY(30px);
           transition: all 1s ease-out;
         }
         .hero-content.animate {
           opacity: 1;
           transform: translateY(0);
         }
-        
         .cta-button {
           margin-top: 2rem;
           padding: 0.75rem 1.5rem;
@@ -634,6 +568,7 @@ export default function BreweryApp() {
           letter-spacing: 1px;
           position: relative;
           overflow: hidden;
+          font-family: 'Inter', sans-serif;
         }
         .cta-button:hover {
           transform: translateY(-2px);
@@ -653,7 +588,6 @@ export default function BreweryApp() {
         .cta-button:hover:after {
           left: 120%;
         }
-        
         .fade-in-section {
           opacity: 0;
           transform: translateY(30px);
@@ -663,24 +597,34 @@ export default function BreweryApp() {
           opacity: 1;
           transform: translateY(0);
         }
-        
-        .card-hover {
-          transition: all 0.3s ease;
+        .card-3d-effect {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+          border-radius: 16px;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+          transform: perspective(1000px) rotateX(0) rotateY(0);
         }
-        .card-hover:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        .card-3d-effect:hover {
+          transform: perspective(1000px) rotateX(2deg) rotateY(2deg);
+          box-shadow: 0 15px 35px rgba(0,0,0,0.2);
         }
-        
+        .glass-effect {
+          backdrop-filter: blur(10px);
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
         .section-title {
           position: relative;
           display: inline-block;
           margin-bottom: 1.5rem;
+          padding-bottom: 0.5rem;
+          font-family: 'Playfair Display', serif;
         }
         .section-title:after {
           content: '';
           position: absolute;
-          bottom: -8px;
+          bottom: 0;
           left: 50%;
           transform: translateX(-50%);
           width: 60px;
@@ -688,7 +632,6 @@ export default function BreweryApp() {
           background: linear-gradient(to right, #d97706, #f59e0b);
           border-radius: 3px;
         }
-        
         .badge {
           display: inline-flex;
           align-items: center;
@@ -699,50 +642,11 @@ export default function BreweryApp() {
           background: linear-gradient(to right, #d97706, #b45309);
           border-radius: 50px;
           box-shadow: 0 2px 10px rgba(217, 119, 6, 0.3);
-          margin-right: 0.5rem;
-          margin-bottom: 0.5rem;
+          margin: 0.5rem;
+          font-family: 'Inter', sans-serif;
         }
         .badge svg {
           margin-right: 0.5rem;
-        }
-        .card-3d-effect {
-          transition: transform 0.3s ease, box-shadow 0.3s ease;
-          border-radius: 16px;
-          overflow: hidden;
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-          transform: perspective(1000px) rotateX(0) rotateY(0);
-          transform-style: preserve-3d;
-          will-change: transform, box-shadow;
-        }
-        .card-3d-effect:hover {
-          box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-        }
-        .glass-effect {
-          backdrop-filter: blur(10px);
-          background-color: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-        .scrolling-text {
-          white-space: nowrap;
-          overflow: hidden;
-          animation: scrollText 20s linear infinite;
-        }
-        @keyframes scrollText {
-          0% { transform: translateX(100%); }
-          100% { transform: translateX(-100%); }
-        }
-        .feature-badge {
-          display: flex;
-          align-items: center;
-          background: rgba(217, 119, 6, 0.1);
-          border-radius: 8px;
-          padding: 0.75rem 1rem;
-          margin-bottom: 0.75rem;
-        }
-        .feature-badge svg {
-          color: #d97706;
-          margin-right: 0.75rem;
         }
         .award-badge {
           background: linear-gradient(to right, #f59e0b, #d97706);
@@ -751,12 +655,17 @@ export default function BreweryApp() {
           padding: 0.25rem 0.5rem;
           font-size: 0.75rem;
           font-weight: 600;
-          margin-right: 0.5rem;
+          margin: 0.3rem;
           display: inline-flex;
           align-items: center;
+          font-family: 'Inter', sans-serif;
         }
         .award-badge svg {
           margin-right: 0.25rem;
+        }
+        .chart-container:hover {
+          transform: scale(1.02);
+          transition: transform 0.3s ease;
         }
       `}</style>
       
@@ -766,12 +675,12 @@ export default function BreweryApp() {
       {/* Hero Section with Brewery Panorama */}
       <div className="hero-section">
         <img 
-          src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&h=900" 
+          src="/public/images/panorama-bg.png" 
           alt="Vienna Brewery Panorama" 
           className="hero-image"
         />
         <div className="hero-overlay"></div>
-        <div className="hero-content">
+        <div className={`hero-content ${animateHero ? 'animate' : ''}`}>
           <h1 className={`text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight ${theme.gradientText} font-['Playfair_Display']`}>
             {t.title}
           </h1>
@@ -861,7 +770,7 @@ export default function BreweryApp() {
               ))}
             </div>
             
-            {/* Historische Datensteuerung */}
+            {/* Historical Data Controls */}
             {selectedProcess !== 'live' && (
               <div className="flex items-center justify-between mb-6 p-3 rounded-xl bg-amber-100/50 dark:bg-amber-900/20 border ${theme.borderColor} transition-all">
                 <button 
@@ -888,7 +797,7 @@ export default function BreweryApp() {
             )}
             
             {/* Brew Data Visualization */}
-            <div className={`${theme.bgCard} p-6 rounded-2xl transition-all`} ref={chartRef}>
+            <div className={`${theme.bgCard} p-6 rounded-2xl transition-all chart-container`} ref={chartRef}>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -955,9 +864,9 @@ export default function BreweryApp() {
                   <div>
                     <p className={`text-sm ${theme.textSecondary} font-['Inter']`}>{t.temperature}</p>
                     <p className={`text-2xl font-bold ${theme.textPrimary} font-['Inter']`}>
-                      {selectedProcess === 'live' ? 
+                      {(selectedProcess === 'live' ? 
                         currentData[currentData.length - 1]?.temperature : 
-                        historicalData[historicalData.length - 1]?.temperature}°C
+                        historicalData[historicalData.length - 1]?.temperature) || '--'}°C
                     </p>
                   </div>
                 </div>
@@ -966,9 +875,9 @@ export default function BreweryApp() {
                   <div>
                     <p className={`text-sm ${theme.textSecondary} font-['Inter']`}>{t.pressure}</p>
                     <p className={`text-2xl font-bold ${theme.textPrimary} font-['Inter']`}>
-                      {selectedProcess === 'live' ? 
+                      {(selectedProcess === 'live' ? 
                         currentData[currentData.length - 1]?.pressure : 
-                        historicalData[historicalData.length - 1]?.pressure} bar
+                        historicalData[historicalData.length - 1]?.pressure) || '--'} bar
                     </p>
                   </div>
                 </div>
@@ -1012,16 +921,7 @@ export default function BreweryApp() {
               </div>
               <div className="flex flex-col md:flex-row">
                 <div className="w-full md:w-1/3 mb-6 md:mb-0 flex justify-center">
-                  <div className="w-36 h-72 beer-glass">
-                    <div className="beer-foam"></div>
-                    <div className="beer-liquid">
-                      <div className="beer-bubble"></div>
-                      <div className="beer-bubble"></div>
-                      <div className="beer-bubble"></div>
-                      <div className="beer-bubble"></div>
-                      <div className="beer-bubble"></div>
-                    </div>
-                  </div>
+                  <BeerGlass className="w-36 h-72" />
                 </div>
                 <div className="w-full md:w-2/3 md:pl-6">
                   <h3 className={`text-2xl font-bold ${theme.gradientText} mb-2 font-['Playfair_Display']`}>{currentBeer.name}</h3>
@@ -1120,30 +1020,12 @@ export default function BreweryApp() {
         </div>
       </footer>
       
-      {/* Benachrichtigung */}
+      {/* Notification */}
       {notification && (
         <div className="notification font-['Inter']">
           {notification}
         </div>
       )}
-      
-      {/* Scroll-Trigger für Fade-In-Animationen */}
-      <script>
-        {`
-          document.addEventListener('DOMContentLoaded', () => {
-            const sections = document.querySelectorAll('.fade-in-section');
-            const observer = new IntersectionObserver((entries) => {
-              entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                  entry.target.classList.add('visible');
-                  observer.unobserve(entry.target);
-                }
-              });
-            }, { threshold: 0.1 });
-            sections.forEach(section => observer.observe(section));
-          });
-        `}
-      </script>
     </div>
   );
 }
