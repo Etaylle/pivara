@@ -715,6 +715,7 @@ export default function BreweryApp() {
       left: 0,
       width: '100%',
       height: '100%',
+      
       backgroundImage: 'url("/panorama.jpeg")',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
