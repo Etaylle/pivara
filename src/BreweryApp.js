@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Timer, Thermometer, ArrowUp, Star, Sun, Moon, Share2, Globe, QrCode, Calendar, ArrowLeft, ArrowRight, Droplets, Wheat, Award } from 'lucide-react';
+import panoramaImage from './assets/panorama.jpeg'; // Import the image
 
 // Simulate Live Data
 const generateMockData = (timeOffset = 0) => {
@@ -324,9 +325,9 @@ export default function BreweryApp() {
   const getThemeClasses = () => {
     return {
       bgMain: darkMode ? 'bg-gradient-to-b from-gray-900 to-amber-950' : 'bg-gradient-to-b from-amber-50 to-amber-200',
-      bgHeader: darkMode ? 'bg-amber-900/70' : 'bg-amber-700/70', // Adjusted for transparency
+      bgHeader: darkMode ? 'bg-amber-900/70' : 'bg-amber-700/70',
       bgCard: darkMode ? 'bg-gray-800/90' : 'bg-white/90',
-      textPrimary: darkMode ? 'text-white' : 'text-amber-100', // Changed to lighter color for contrast
+      textPrimary: darkMode ? 'text-white' : 'text-amber-100',
       textSecondary: darkMode ? 'text-gray-300' : 'text-gray-600',
       textMuted: darkMode ? 'text-gray-400' : 'text-gray-500',
       bgHighlight: darkMode ? 'bg-amber-900/30' : 'bg-amber-50',
@@ -538,7 +539,7 @@ export default function BreweryApp() {
           left: 0;
           width: 100%;
           height: 100%;
-          background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%);
+          background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%);
           z-index: -1;
         }
         .hero-content {
@@ -547,6 +548,9 @@ export default function BreweryApp() {
           max-width: 800px;
           z-index: 1;
           transition: all 1s ease-out;
+        }
+        .hero-content h1 {
+          text-shadow: 0 4px 8px rgba(0, 0, 0, 0.7);
         }
         .hero-content.animate {
           opacity: 1;
@@ -667,6 +671,9 @@ export default function BreweryApp() {
           transform: scale(1.02);
           transition: transform 0.3s ease;
         }
+        .text-shadow {
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
         .header-container {
           position: relative;
           background-image: url('https://images.unsplash.com/photo-1571690412283-a0b0b3dc1521?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&h=200');
@@ -701,9 +708,10 @@ export default function BreweryApp() {
       {/* Hero Section with Brewery Panorama */}
       <div className="hero-section">
         <img 
-          src="https://github.com/Etaylle/fh-brauerei/blob/f16344b96fe70020fdc46161ae1b752b64b71225/public/panorama.jpeg" 
+          src={panoramaImage}
           alt="Vienna Brewery Panorama" 
           className="hero-image"
+          onError={() => console.error("Failed to load panorama image. Ensure the file is in src/assets/panorama.jpeg.")}
         />
         <div className="hero-overlay"></div>
         <div className={`hero-content ${animateHero ? 'animate' : ''}`}>
