@@ -715,7 +715,7 @@ export default function BreweryApp() {
       left: 0,
       width: '100%',
       height: '100%',
-      backgroundImage: 'url(https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=2070)',
+      backgroundImage: 'url(https://github.com/Etaylle/fh-brauerei/blob/f16344b96fe70020fdc46161ae1b752b64b71225/public/panorama.jpeg)',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       filter: 'brightness(0.7)',
