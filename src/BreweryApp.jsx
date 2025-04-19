@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Timer, Thermometer, ArrowUp, Star, Sun, Moon, Share2, Globe, QrCode, Calendar, ArrowLeft, ArrowRight, Droplets, Wheat, Award } from 'lucide-react';
-import panoramaImage from './assets/panorama.jpeg'; // Import the image
+
 
 // Simulate Live Data
 const generateMockData = (timeOffset = 0) => {
@@ -87,7 +87,7 @@ export default function BreweryApp() {
   const [averageRating, setAverageRating] = useState(4.2);
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [language, setLanguage] = useState('de');
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [showQRCode, setShowQRCode] = useState(false);
   const [historicalDay, setHistoricalDay] = useState(0);
   const [showShareOptions, setShowShareOptions] = useState(false);
@@ -324,20 +324,20 @@ export default function BreweryApp() {
   // CSS Classes for Dark/Light Mode
   const getThemeClasses = () => {
     return {
-      bgMain: darkMode ? 'bg-gradient-to-b from-gray-900 to-amber-950' : 'bg-gradient-to-b from-amber-50 to-amber-200',
-      bgHeader: darkMode ? 'bg-amber-900/70' : 'bg-amber-700/70',
-      bgCard: darkMode ? 'bg-gray-800/90' : 'bg-white/90',
-      textPrimary: darkMode ? 'text-white' : 'text-amber-100',
-      textSecondary: darkMode ? 'text-gray-300' : 'text-gray-600',
-      textMuted: darkMode ? 'text-gray-400' : 'text-gray-500',
-      bgHighlight: darkMode ? 'bg-amber-900/30' : 'bg-amber-50',
-      bgStatsCard: darkMode ? 'bg-gray-700' : 'bg-amber-100',
-      bgFooter: darkMode ? 'bg-gray-800/90' : 'bg-amber-900/90',
-      textFooter: darkMode ? 'text-gray-300' : 'text-amber-100',
-      buttonPrimary: darkMode ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-amber-600 text-white hover:bg-amber-500',
-      buttonSecondary: darkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-amber-100 text-amber-800 hover:bg-amber-200',
-      borderColor: darkMode ? 'border-gray-700' : 'border-amber-100',
-      gradientText: darkMode ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-500' : 'text-transparent bg-clip-text bg-gradient-to-r from-amber-800 to-amber-600'
+      bgMain: darkMode ? 'bg-gradient-to-b from-gray-900 to-amber-950' : 'bg-gradient-to-b from-amber-50 to-amber-100',
+      bgHeader: darkMode ? 'bg-amber-900/70' : 'bg-amber-800/80',
+      bgCard: darkMode ? 'bg-gray-800/90' : 'bg-white/95',
+      textPrimary: darkMode ? 'text-white' : 'text-amber-900',
+      textSecondary: darkMode ? 'text-gray-300' : 'text-amber-800',
+      textMuted: darkMode ? 'text-gray-400' : 'text-amber-700/80',
+      bgHighlight: darkMode ? 'bg-amber-900/30' : 'bg-amber-100/70',
+      bgStatsCard: darkMode ? 'bg-gray-700' : 'bg-amber-50',
+      bgFooter: darkMode ? 'bg-gray-800/90' : 'bg-amber-800/90',
+      textFooter: darkMode ? 'text-gray-300' : 'text-amber-50',
+      buttonPrimary: darkMode ? 'bg-amber-700 text-white hover:bg-amber-600' : 'bg-amber-700 text-white hover:bg-amber-600',
+      buttonSecondary: darkMode ? 'bg-gray-700 text-gray-200 hover:bg-gray-600' : 'bg-amber-200 text-amber-900 hover:bg-amber-300',
+      borderColor: darkMode ? 'border-gray-700' : 'border-amber-200',
+      gradientText: darkMode ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-500' : 'text-transparent bg-clip-text bg-gradient-to-r from-amber-900 to-amber-700'
     };
   };
   
@@ -707,40 +707,51 @@ export default function BreweryApp() {
       
       {/* Hero Section with Brewery Panorama */}
       <div className="hero-section">
-        <img 
-          src={panoramaImage}
-          alt="Vienna Brewery Panorama" 
-          className="hero-image"
-          onError={() => console.error("Failed to load panorama image. Ensure the file is in src/assets/panorama.jpeg.")}
-        />
-        <div className="hero-overlay"></div>
-        <div className={`hero-content ${animateHero ? 'animate' : ''}`}>
-          <h1 className={`text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight ${theme.gradientText} font-['Playfair_Display']`}>
-            {t.title}
-          </h1>
-          <p className="text-2xl text-amber-100 mb-8 italic font-['Inter']">{t.slogan}</p>
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            <div className="badge">
-              <Droplets size={20} />
-              {t.brewingSince}
-            </div>
-            <div className="badge">
-              <Wheat size={20} />
-              {t.qualityPromise}
-            </div>
-            <div className="badge">
-              <Award size={20} />
-              {t.awardWinning}
-            </div>
-          </div>
-          <button 
-            className="cta-button" 
-            onClick={() => document.getElementById('brewData').scrollIntoView({ behavior: 'smooth' })}
-          >
-            {t.viewProcess}
-          </button>
-        </div>
+  <div 
+    className="hero-image"
+    style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundImage: 'url(https://images.unsplash.com/photo-1559526324-593bc073d938?q=80&w=2070)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      filter: 'brightness(0.7)',
+      transform: 'scale(1.05)',
+      transition: 'transform 10s ease-in-out',
+      zIndex: -1
+    }}
+  ></div>
+  <div className="hero-overlay"></div>
+  <div className={`hero-content ${animateHero ? 'animate' : ''}`}>
+    <h1 className={`text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight ${theme.gradientText} font-['Playfair_Display']`}>
+      {t.title}
+    </h1>
+    <p className="text-2xl text-amber-100 mb-8 italic font-['Inter']">{t.slogan}</p>
+    <div className="flex flex-wrap justify-center gap-4 mb-8">
+      <div className="badge">
+        <Droplets size={20} />
+        {t.brewingSince}
       </div>
+      <div className="badge">
+        <Wheat size={20} />
+        {t.qualityPromise}
+      </div>
+      <div className="badge">
+        <Award size={20} />
+        {t.awardWinning}
+      </div>
+    </div>
+    <button 
+      className="cta-button" 
+      onClick={() => document.getElementById('brewData').scrollIntoView({ behavior: 'smooth' })}
+    >
+      {t.viewProcess}
+    </button>
+  </div>
+</div>
       
       {/* Sticky Header with Background Image */}
       <header className={`sticky top-0 z-50 ${theme.bgHeader} text-white shadow-lg transition-all duration-300 glass-effect header-container`}>
