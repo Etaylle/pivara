@@ -676,7 +676,7 @@ export default function BreweryApp() {
         }
         .header-container {
           position: relative;
-          background-image: url('https://images.unsplash.com/photo-1571690412283-a0b0b3dc1521?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&h=200');
+          background-image: url('/small.jpeg');
           background-size: cover;
           background-position: center;
           background-blend-mode: overlay;
