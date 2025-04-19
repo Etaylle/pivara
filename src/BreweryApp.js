@@ -669,7 +669,7 @@ export default function BreweryApp() {
         }
         .header-container {
           position: relative;
-          background-image: url('/panorama.jpeg');
+          background-image: url('https://images.unsplash.com/photo-1571690412283-a0b0b3dc1521?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&h=200');
           background-size: cover;
           background-position: center;
           background-blend-mode: overlay;
@@ -701,7 +701,7 @@ export default function BreweryApp() {
       {/* Hero Section with Brewery Panorama */}
       <div className="hero-section">
         <img 
-          src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&h=900" 
+          src="/panorama.jpg" 
           alt="Vienna Brewery Panorama" 
           className="hero-image"
         />
