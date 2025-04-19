@@ -669,7 +669,7 @@ export default function BreweryApp() {
         }
         .header-container {
           position: relative;
-          background-image: url('./public/panorama.jpeg');
+          background-image: url('/panorama.jpeg');
           background-size: cover;
           background-position: center;
           background-blend-mode: overlay;
