@@ -677,14 +677,14 @@ export default function BreweryApp() {
        .header-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 3 / 1; /* oder 7616 / 2560 */
-  background-image: url('/small.jpeg');
+  height: 40vh; 
+  background-image: url('/nova.jpeg'); /* oder '/header.jpg' o.ä. */
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-repeat: no-repeat;
   background-blend-mode: overlay;
-  filter: brightness(0.75);
-  overflow: hidden;
+  backdrop-filter: blur(10px);
+  z-index: 0;
 }
         .header-container::before {
           content: '';
