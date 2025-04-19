@@ -48,12 +48,44 @@ const generateHistoricalData = (process, day = 0) => {
   return data;
 };
 
-// QR-Code Komponente (Platzhalter)
+// QR-Code Komponente
 const QRCodeDisplay = () => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center backdrop-blur-sm bg-white/80 dark:bg-gray-800/80 border border-amber-100 dark:border-amber-900/30">
       <QrCode size={180} className="text-amber-900 mb-4" />
       <p className="text-center text-gray-700 dark:text-gray-300">Scannen Sie diesen QR-Code, um die Brauerei-App auf Ihrem Mobilgerät zu öffnen</p>
+    </div>
+  );
+};
+
+// Bier-Glaseffekt Komponente
+const BeerGlass = ({ className }) => {
+  return (
+    <div className={`beer-glass ${className}`}>
+      <div className="beer-foam">
+        <div className="beer-foam-bubble beer-foam-bubble-1"></div>
+        <div className="beer-foam-bubble beer-foam-bubble-2"></div>
+        <div className="beer-foam-bubble beer-foam-bubble-3"></div>
+      </div>
+      <div className="beer-liquid">
+        <div className="beer-bubble beer-bubble-1"></div>
+        <div className="beer-bubble beer-bubble-2"></div>
+        <div className="beer-bubble beer-bubble-3"></div>
+        <div className="beer-bubble beer-bubble-4"></div>
+        <div className="beer-bubble beer-bubble-5"></div>
+        <div className="beer-highlight"></div>
+      </div>
+    </div>
+  );
+};
+
+// Dekorative Hopfen-Animation
+const HopsAnimation = () => {
+  return (
+    <div className="hops-animation">
+      <div className="hop hop-1"></div>
+      <div className="hop hop-2"></div>
+      <div className="hop hop-3"></div>
     </div>
   );
 };
@@ -73,8 +105,10 @@ export default function BreweryApp() {
   const [historicalDay, setHistoricalDay] = useState(0);
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [animateHero, setAnimateHero] = useState(false);
   
   const chartRef = useRef(null);
+  const heroRef = useRef(null);
   
   // Text-Übersetzungen
   const translations = {
@@ -119,7 +153,11 @@ export default function BreweryApp() {
       viewProcess: "Brauprozess einsehen",
       brewingSince: "Bierbraukunst seit 1785",
       qualityPromise: "Höchste Qualität garantiert",
-      awardWinning: "Preisgekröntes Bier"
+      awardWinning: "Preisgekröntes Bier",
+      ourTradition: "Unsere Tradition",
+      visitUs: "Besuchen Sie uns",
+      learnMore: "Mehr erfahren",
+      subscribeNewsletter: "Newsletter abonnieren"
     },
     en: {
       title: "FH Brewery Vienna",
@@ -162,7 +200,11 @@ export default function BreweryApp() {
       viewProcess: "View brewing process",
       brewingSince: "Brewing excellence since 1785",
       qualityPromise: "Highest quality guaranteed",
-      awardWinning: "Award-winning beer"
+      awardWinning: "Award-winning beer",
+      ourTradition: "Our Tradition",
+      visitUs: "Visit Us",
+      learnMore: "Learn More",
+      subscribeNewsletter: "Subscribe to newsletter"
     }
   };
   
@@ -184,7 +226,7 @@ export default function BreweryApp() {
     },
     awards: ["Vienna Beer Festival 2024", "European Beer Star 2023"]
   };
-  
+
   // Aktualisiere Live-Daten alle 5 Minuten (simuliert als 5 Sekunden für Demo)
   useEffect(() => {
     // Initialisiere mit Datenpunkten
@@ -205,6 +247,13 @@ export default function BreweryApp() {
     return () => clearInterval(interval);
   }, []);
   
+  // Hero-Animation beim Laden
+  useEffect(() => {
+    setTimeout(() => {
+      setAnimateHero(true);
+    }, 300);
+  }, []);
+  
   // Aktualisiere historische Daten bei Prozessänderung
   useEffect(() => {
     if (selectedProcess !== 'live') {
@@ -220,6 +269,25 @@ export default function BreweryApp() {
       document.body.classList.remove('dark-mode');
     }
   }, [darkMode]);
+  
+  // Scroll-Animation für Sektionen
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = document.querySelectorAll('.fade-in-section');
+      sections.forEach(section => {
+        const sectionTop = section.getBoundingClientRect().top;
+        const windowHeight = window.innerHeight;
+        if (sectionTop < windowHeight * 0.85) {
+          section.classList.add('visible');
+        }
+      });
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   // Rating Handler
   const handleRating = (rating) => {
@@ -277,7 +345,7 @@ export default function BreweryApp() {
   // CSS-Klassen für dunklen/hellen Modus
   const getThemeClasses = () => {
     return {
-      bgMain: darkMode ? 'bg-gradient-to-b from-gray-900 to-amber-950' : 'bg-gradient-to-b from-amber-50 to-amber-100',
+      bgMain: darkMode ? 'bg-gradient-to-b from-gray-900 to-amber-950' : 'bg-gradient-to-b from-amber-50 to-amber-200',
       bgHeader: darkMode ? 'bg-gradient-to-r from-amber-900 to-amber-800' : 'bg-gradient-to-r from-amber-700 to-amber-600',
       bgCard: darkMode ? 'bg-gray-800/90' : 'bg-white/90',
       textPrimary: darkMode ? 'text-white' : 'text-amber-900',
@@ -313,15 +381,42 @@ export default function BreweryApp() {
   }, [currentData, historicalData]);
 
   return (
-    <div className={`flex flex-col min-h-screen ${theme.bgMain} transition-colors duration-300 overflow-hidden relative`}>
+    <div className={`flex flex-col min-h-screen ${theme.bgMain} transition-colors duration-500 overflow-hidden relative`}>
       <style jsx>{`
-        .pulse-animation {
-          animation: pulse 1s ease-in-out;
+        @keyframes float {
+          0% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-15px) rotate(5deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
         }
         @keyframes pulse {
-          0% { opacity: 0.5; }
-          50% { opacity: 1; }
-          100% { opacity: 0.9; }
+          0% { opacity: 0.5; transform: scale(0.98); }
+          50% { opacity: 1; transform: scale(1.02); }
+          100% { opacity: 0.9; transform: scale(1); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+          from { opacity: 1; transform: translateY(0); }
+          to { opacity: 0; transform: translateY(-20px); }
+        }
+        @keyframes shine {
+          0% { background-position: -100% 0; }
+          100% { background-position: 200% 0; }
+        }
+        @keyframes rise {
+          0% { transform: translateY(0) scale(1); opacity: 0; }
+          50% { opacity: 0.8; transform: translateY(-100px) scale(1.1); }
+          100% { transform: translateY(-200px) scale(0.8); opacity: 0; }
+        }
+        @keyframes rotate {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        
+        .pulse-animation {
+          animation: pulse 1s ease-in-out;
         }
         .dark-mode {
           color-scheme: dark;
@@ -332,9 +427,7 @@ export default function BreweryApp() {
           height: 100%;
           border-radius: 16px 16px 12px 12px;
           overflow: hidden;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(255,255,255,0.1);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.2);
         }
         .beer-foam {
           position: absolute;
@@ -347,16 +440,45 @@ export default function BreweryApp() {
           z-index: 1;
           box-shadow: inset 0 -5px 15px -5px rgba(0,0,0,0.1);
         }
-        .beer-foam::before {
+        .beer-foam::before,
+        .beer-foam::after {
           content: '';
           position: absolute;
-          bottom: -5px;
-          left: 10%;
-          width: 20%;
-          height: 10px;
+          bottom: -10px;
+          width: 40%;
+          height: 20px;
           background: #f5f5f4;
           border-radius: 50%;
-          box-shadow: 30px 2px 0 5px #f5f5f4, 60px -2px 0 8px #f5f5f4;
+        }
+        .beer-foam::before {
+          left: 10%;
+        }
+        .beer-foam::after {
+          right: 10%;
+        }
+        .beer-foam-bubble {
+          position: absolute;
+          background: rgba(255,255,255,0.9);
+          border-radius: 50%;
+          box-shadow: 0 0 10px rgba(255,255,255,0.8);
+        }
+        .beer-foam-bubble-1 {
+          width: 30px;
+          height: 20px;
+          top: 20%;
+          left: 20%;
+        }
+        .beer-foam-bubble-2 {
+          width: 25px;
+          height: 15px;
+          top: 40%;
+          left: 50%;
+        }
+        .beer-foam-bubble-3 {
+          width: 35px;
+          height: 25px;
+          top: 30%;
+          right: 25%;
         }
         .beer-liquid {
           position: absolute;
@@ -371,52 +493,57 @@ export default function BreweryApp() {
         }
         .beer-bubble {
           position: absolute;
-          bottom: 10%;
           background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
           border-radius: 50%;
-          animation: rise 3s infinite ease-in;
+          animation: rise 4s infinite ease-out;
           box-shadow: 0 0 4px rgba(255,255,255,0.6);
         }
-        .beer-bubble:nth-child(1) {
+        .beer-bubble-1 {
           left: 20%;
           width: 8px;
           height: 8px;
+          bottom: 5%;
           animation-delay: 0.2s;
         }
-        .beer-bubble:nth-child(2) {
+        .beer-bubble-2 {
           left: 60%;
-          width: 6px;
-          height: 6px;
+          width: 12px;
+          height: 12px;
+          bottom: 8%;
           animation-delay: 1s;
         }
-        .beer-bubble:nth-child(3) {
+        .beer-bubble-3 {
           left: 80%;
-          width: 4px;
-          height: 4px;
+          width: 6px;
+          height: 6px;
+          bottom: 12%;
           animation-delay: 0.5s;
         }
-        .beer-bubble:nth-child(4) {
+        .beer-bubble-4 {
           left: 35%;
-          width: 7px;
-          height: 7px;
+          width: 10px;
+          height: 10px;
+          bottom: 15%;
           animation-delay: 1.5s;
         }
-        .beer-bubble:nth-child(5) {
+        .beer-bubble-5 {
           left: 50%;
-          width: 5px;
-          height: 5px;
+          width: 7px;
+          height: 7px;
+          bottom: 20%;
           animation-delay: 0.8s;
         }
-        @keyframes rise {
-          0% { transform: translateY(0) scale(1); opacity: 0; }
-          50% { opacity: 0.8; transform: translateY(-50px) scale(1.1); }
-          100% { transform: translateY(-120px) scale(0.5); opacity: 0; }
+        .beer-highlight {
+          position: absolute;
+          top: 10%;
+          left: 15%;
+          width: 40%;
+          height: 60%;
+          background: radial-gradient(ellipse at center, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+          border-radius: 50%;
+          transform: rotate(-20deg);
         }
-        @keyframes bubbles {
-          0% { background-position: 0 0; }
-          50% { background-position: 0 5px; }
-          100% { background-position: 0 0; }
-        }
+        
         .notification {
           position: fixed;
           bottom: 20px;
@@ -430,24 +557,18 @@ export default function BreweryApp() {
           animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
           backdrop-filter: blur(8px);
         }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translate(-50%, 20px); }
-          to { opacity: 1; transform: translate(-50%, 0); }
-        }
-        @keyframes fadeOut {
-          from { opacity: 1; transform: translate(-50%, 0); }
-          to { opacity: 0; transform: translate(-50%, -20px); }
-        }
+        
         .grain-pattern {
           position: absolute;
           top: 0;
           left: 0;
           width: 100%;
           height: 100%;
-          background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d97706' fill-opacity='0.07'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-          opacity: 0.5;
+          background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d97706' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+          opacity: 0.6;
           z-index: -1;
         }
+        
         .hero-section {
           position: relative;
           min-height: 400px;
@@ -457,7 +578,7 @@ export default function BreweryApp() {
           overflow: hidden;
           margin-bottom: 2rem;
           border-radius: 0 0 30px 30px;
-          box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
+          box-shadow: 0 10px 30px -5px rgba(0,0,0,0.2);
         }
         .hero-image {
           position: absolute;
@@ -480,7 +601,7 @@ export default function BreweryApp() {
           left: 0;
           width: 100%;
           height: 100%;
-          background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 100%);
+          background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.8) 100%);
           z-index: -1;
         }
         .hero-content {
@@ -488,7 +609,15 @@ export default function BreweryApp() {
           padding: 2rem;
           max-width: 800px;
           z-index: 1;
+          opacity: 0;
+          transform: translateY(30px);
+          transition: all 1s ease-out;
         }
+        .hero-content.animate {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        
         .cta-button {
           margin-top: 2rem;
           padding: 0.75rem 1.5rem;
@@ -524,6 +653,25 @@ export default function BreweryApp() {
         .cta-button:hover:after {
           left: 120%;
         }
+        
+        .fade-in-section {
+          opacity: 0;
+          transform: translateY(30px);
+          transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        .fade-in-section.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        
+        .card-hover {
+          transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+          transform: translateY(-5px);
+          box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
+        
         .section-title {
           position: relative;
           display: inline-block;
@@ -540,6 +688,7 @@ export default function BreweryApp() {
           background: linear-gradient(to right, #d97706, #f59e0b);
           border-radius: 3px;
         }
+        
         .badge {
           display: inline-flex;
           align-items: center;
