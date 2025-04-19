@@ -324,9 +324,9 @@ export default function BreweryApp() {
   const getThemeClasses = () => {
     return {
       bgMain: darkMode ? 'bg-gradient-to-b from-gray-900 to-amber-950' : 'bg-gradient-to-b from-amber-50 to-amber-200',
-      bgHeader: darkMode ? 'bg-gradient-to-r from-amber-900 to-amber-800' : 'bg-gradient-to-r from-amber-700 to-amber-600',
+      bgHeader: darkMode ? 'bg-amber-900/70' : 'bg-amber-700/70', // Adjusted for transparency
       bgCard: darkMode ? 'bg-gray-800/90' : 'bg-white/90',
-      textPrimary: darkMode ? 'text-white' : 'text-amber-900',
+      textPrimary: darkMode ? 'text-white' : 'text-amber-100', // Changed to lighter color for contrast
       textSecondary: darkMode ? 'text-gray-300' : 'text-gray-600',
       textMuted: darkMode ? 'text-gray-400' : 'text-gray-500',
       bgHighlight: darkMode ? 'bg-amber-900/30' : 'bg-amber-50',
@@ -667,6 +667,32 @@ export default function BreweryApp() {
           transform: scale(1.02);
           transition: transform 0.3s ease;
         }
+        .header-container {
+          position: relative;
+          background-image: url('./public/panorama.jpeg');
+          background-size: cover;
+          background-position: center;
+          background-blend-mode: overlay;
+          backdrop-filter: blur(10px);
+        }
+        .header-container::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: ${darkMode ? 'rgba(0, 0, 0, 0.5)' : 'rgba(0, 0, 0, 0.3)'};
+          z-index: 0;
+        }
+        .header-content {
+          position: relative;
+          z-index: 1;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 1rem 1.5rem;
+        }
       `}</style>
       
       {/* Decorative Background Elements */}
@@ -675,7 +701,7 @@ export default function BreweryApp() {
       {/* Hero Section with Brewery Panorama */}
       <div className="hero-section">
         <img 
-          src="/public/images/panorama-bg.png" 
+          src="https://images.unsplash.com/photo-1514933651103-005eec06c04b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&h=900" 
           alt="Vienna Brewery Panorama" 
           className="hero-image"
         />
@@ -708,11 +734,11 @@ export default function BreweryApp() {
         </div>
       </div>
       
-      {/* Sticky Header with Controls */}
-      <header className={`sticky top-0 z-50 ${theme.bgHeader} text-white py-4 px-6 shadow-lg transition-all duration-300 glass-effect`}>
-        <div className="container mx-auto flex justify-between items-center">
+      {/* Sticky Header with Background Image */}
+      <header className={`sticky top-0 z-50 ${theme.bgHeader} text-white shadow-lg transition-all duration-300 glass-effect header-container`}>
+        <div className="header-content container mx-auto">
           <div className="flex items-center space-x-4">
-            <h2 className="text-xl font-bold font-['Playfair_Display']">{t.title}</h2>
+            <h2 className="text-xl font-bold font-['Playfair_Display'] text-shadow">{t.title}</h2>
           </div>
           <div className="flex space-x-4">
             <button 
