@@ -677,7 +677,7 @@ export default function BreweryApp() {
        .header-container {
   position: relative;
   width: 100%;
-  height: 40vh; 
+  aspect-ratio: 3 / 1;
   background-image: url('/nova.jpeg'); /* oder '/header.jpg' o.ä. */
   background-size: cover;
   background-position: center center;
