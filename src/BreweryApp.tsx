@@ -6,7 +6,25 @@ import { format } from 'date-fns';
 import de from 'date-fns/locale/de';
 import { ChartDataPoint, LiveData, ProcessType, SensorData, DashboardError, Beer, ReviewsSummary } from '../types';
 import ProcessCard from './components/ProcessCard';
-
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { StarRating } from './components/StarRating'; 
+import { Star, Award, Activity, TrendingUp, Droplets, Zap } from 'lucide-react';
+import { format } from 'date-fns';
+import de from 'date-fns/locale/de';
+import { ChartDataPoint, LiveData, ProcessType, SensorData, DashboardError, Beer, ReviewsSummary } from '../types';
+import ProcessCard from './components/ProcessCard';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { StarRating } from './components/StarRating'; 
+import { Star, Award, Activity, TrendingUp, Droplets, Zap } from 'lucide-react';
+import { format } from 'date-fns';
+import de from 'date-fns/locale/de';
+import { ChartDataPoint, LiveData, ProcessType, SensorData, DashboardError, Beer, ReviewsSummary } from '../types';
+import ProcessCard from './components/ProcessCard';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { StarRating } from './components/StarRating';   
 // Process configuration
 const processNames: Record<ProcessType, string> = {
   gaerung: 'Gärung',
