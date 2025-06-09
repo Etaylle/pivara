@@ -1,408 +1,448 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Star, Award, Activity, TrendingUp, Droplets, Zap } from 'lucide-react';
-import { format } from 'date-fns';
-import de from 'date-fns/locale/de';
-import { ChartDataPoint, LiveData, ProcessType, SensorData, DashboardError, Beer, ReviewsSummary } from '../types';
-import ProcessCard from './components/ProcessCard';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { StarRating } from './components/StarRating'; 
-import { Star, Award, Activity, TrendingUp, Droplets, Zap } from 'lucide-react';
-import { format } from 'date-fns';
-import de from 'date-fns/locale/de';
-import { ChartDataPoint, LiveData, ProcessType, SensorData, DashboardError, Beer, ReviewsSummary } from '../types';
-import ProcessCard from './components/ProcessCard';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { StarRating } from './components/StarRating'; 
-import { Star, Award, Activity, TrendingUp, Droplets, Zap } from 'lucide-react';
-import { format } from 'date-fns';
-import de from 'date-fns/locale/de';
-import { ChartDataPoint, LiveData, ProcessType, SensorData, DashboardError, Beer, ReviewsSummary } from '../types';
-import ProcessCard from './components/ProcessCard';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { StarRating } from './components/StarRating';   
-// Process configuration
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from 'recharts';
+import {
+  Star, Award, Activity, TrendingUp, Droplets, Zap, Thermometer,
+  AlertTriangle, CheckCircle, Clock, BarChart3, Settings, Power
+} from 'lucide-react';
+
+// Types
+interface ChartDataPoint {
+  time: number;
+  temperatur: number;
+  temperature: number;
+  druck: number;
+  pressure: number;
+  ph: number;
+  timestamp: string;
+}
+
+interface SensorData {
+  temperatur?: number;
+  temperature?: number;
+  druck?: number;
+  pressure?: number;
+  ph?: number;
+  lastUpdate: string;
+  status: 'online' | 'offline' | 'warning';
+}
+
+interface Beer {
+  name: string;
+  type: string;
+  status: 'active' | 'fermenting' | 'completed';
+  batchId: string;
+  brewDate: string;
+}
+
+interface ReviewsSummary {
+  durchschnitt: number;
+  anzahl: number;
+  recent: Array<{
+    rating: number;
+    timestamp: string;
+    comment?: string;
+  }>;
+}
+
+type ProcessType = 'gaerung' | 'maischen' | 'hopfenkoehen';
+
+// Mock Data Generator
+class MockDataGenerator {
+  private baseTemp = { gaerung: 18, maischen: 65, hopfenkoehen: 100 };
+  private basePressure = { gaerung: 1.2, maischen: 1.0, hopfenkoehen: 1.8 };
+  private basePh = { gaerung: 4.5, maischen: 5.2, hopfenkoehen: 5.8 };
+  private dataHistory: Record<ProcessType, ChartDataPoint[]> = {
+    gaerung: [],
+    maischen: [],
+    hopfenkoehen: []
+  };
+
+  constructor() {
+    this.initializeHistoricalData();
+  }
+
+  private initializeHistoricalData() {
+    const now = Date.now();
+    const processes: ProcessType[] = ['gaerung', 'maischen', 'hopfenkoehen'];
+    processes.forEach(process => {
+      for (let i = 50; i >= 0; i--) {
+        const timestamp = now - (i * 60000); // Every minute for last 50 minutes
+        this.dataHistory[process].push(this.generateDataPoint(process, timestamp));
+      }
+    });
+  }
+
+  private generateDataPoint(process: ProcessType, timestamp: number): ChartDataPoint {
+    const baseTemp = this.baseTemp[process];
+    const basePressure = this.basePressure[process];
+    const basePh = this.basePh[process];
+    const tempVariation = (Math.random() - 0.5) * 4;
+    const pressureVariation = (Math.random() - 0.5) * 0.3;
+    const phVariation = (Math.random() - 0.5) * 0.6;
+    const temperature = Math.max(0, baseTemp + tempVariation);
+    const pressure = Math.max(0, basePressure + pressureVariation);
+    const ph = Math.max(0, Math.min(14, basePh + phVariation));
+    return {
+      time: timestamp,
+      temperatur: temperature,
+      temperature: temperature,
+      druck: pressure,
+      pressure: pressure,
+      ph: ph,
+      timestamp: new Date(timestamp).toISOString()
+    };
+  }
+
+  generateCurrentSensorData(process: ProcessType): SensorData {
+    const latest = this.dataHistory[process][this.dataHistory[process].length - 1];
+    const isOnline = Math.random() > 0.1; // 90% uptime
+    const hasWarning = Math.random() > 0.8; // 20% chance of warning
+    return {
+      temperatur: latest.temperature,
+      temperature: latest.temperature,
+      druck: latest.pressure,
+      pressure: latest.pressure,
+      ph: latest.ph,
+      lastUpdate: new Date().toISOString(),
+      status: !isOnline ? 'offline' : hasWarning ? 'warning' : 'online'
+    };
+  }
+
+  updateLiveData(): Record<ProcessType, ChartDataPoint[]> {
+    const now = Date.now();
+    const processes: ProcessType[] = ['gaerung', 'maischen', 'hopfenkoehen'];
+    processes.forEach(process => {
+      const newPoint = this.generateDataPoint(process, now);
+      this.dataHistory[process].push(newPoint);
+      if (this.dataHistory[process].length > 50) {
+        this.dataHistory[process].shift();
+      }
+    });
+    return { ...this.dataHistory };
+  }
+
+  getHistoricalData(): Record<ProcessType, ChartDataPoint[]> {
+    return { ...this.dataHistory };
+  }
+
+  generateBeerData(): Beer {
+    const beerNames = ['Wiener Märzen', 'Alpiner Weissbier', 'Donau Gold', 'Kaiserbock', 'Helles Original'];
+    const beerTypes = ['Märzen', 'Weissbier', 'Lager', 'Bock', 'Helles'];
+    const statuses: Beer['status'][] = ['active', 'fermenting', 'completed'];
+    const randomIndex = Math.floor(Math.random() * beerNames.length);
+    return {
+      name: beerNames[randomIndex],
+      type: beerTypes[randomIndex],
+      status: statuses[Math.floor(Math.random() * statuses.length)],
+      batchId: `BATCH-${Date.now().toString().slice(-6)}`,
+      brewDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+    };
+  }
+
+  generateReviewsData(): ReviewsSummary {
+    const reviewCount = Math.floor(Math.random() * 50) + 10;
+    const averageRating = 3 + Math.random() * 2; // 3-5 stars
+    const recentReviews = Array.from({ length: Math.min(5, reviewCount) }, (_, i) => ({
+      rating: Math.floor(Math.random() * 5) + 1,
+      timestamp: new Date(Date.now() - i * 24 * 60 * 60 * 1000).toISOString(),
+      comment: Math.random() > 0.5 ? 'Excellent brew!' : undefined
+    }));
+    return {
+      durchschnitt: Math.round(averageRating * 10) / 10,
+      anzahl: reviewCount,
+      recent: recentReviews
+    };
+  }
+}
+
+// Process Configuration
 const processNames: Record<ProcessType, string> = {
   gaerung: 'Gärung',
   maischen: 'Maischen',
-  hopfenkochen: 'Hopfenkochen',
+  hopfenkoehen: 'Hopfenkochen',
 };
 
 const processIcons: Record<ProcessType, React.ReactNode> = {
   gaerung: <Activity className="w-6 h-6" />,
   maischen: <Droplets className="w-6 h-6" />,
-  hopfenkochen: <Zap className="w-6 h-6" />,
+  hopfenkoehen: <Zap className="w-6 h-6" />,
 };
 
 const processColors: Record<ProcessType, string> = {
   gaerung: 'from-red-500 to-pink-600',
   maischen: 'from-blue-500 to-cyan-600',
-  hopfenkochen: 'from-yellow-500 to-orange-600',
+  hopfenkoehen: 'from-yellow-500 to-orange-600',
 };
 
-// Helper functions for consistent data access
+// Utility Functions
+const formatTime = (timestamp: string | number | undefined): string => {
+  if (!timestamp) return 'Keine Daten';
+  const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(timestamp);
+  if (isNaN(date.getTime())) return 'Ungültiges Datum';
+  return date.toLocaleTimeString('de-DE', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+};
+
 const getTemperatureValue = (data: any): number => {
-  const temp = data?.temperatur ?? data?.temperature ?? data?.values?.temperatur ?? data?.values?.temperature;
-  return temp !== undefined ? parseFloat(temp.toFixed(1)) : 0;
+  const temp = data?.temperatur ?? data?.temperature ?? 0;
+  return parseFloat(temp.toFixed(1));
 };
 
 const getPressureValue = (data: any): number => {
-  const pressure = data?.druck ?? data?.pressure ?? data?.values?.druck ?? data?.values?.pressure;
-  return pressure !== undefined ? parseFloat(pressure.toFixed(2)) : 0;
+  const pressure = data?.druck ?? data?.pressure ?? 0;
+  return parseFloat(pressure.toFixed(2));
 };
 
 const getPhValue = (data: any): number => {
-  const ph = data?.ph ?? data?.values?.ph;
-  return ph !== undefined ? parseFloat(ph.toFixed(1)) : 0;
+  const ph = data?.ph ?? 0;
+  return parseFloat(ph.toFixed(1));
 };
 
-const formatTime = (timestamp: string | number | undefined): string => {
-  if (!timestamp) return 'Keine Daten';
-  const date = typeof timestamp === 'string' ? new Date(Date.parse(timestamp)) : new Date(timestamp);
-  if (isNaN(date.getTime())) return 'Ungültiges Datum';
-  return format(date, 'HH:mm:ss', { locale: de });
-};
-
-
-
-// StarRating component
+// Star Rating Component
 const StarRating: React.FC<{
   rating: number;
   onRate: (rating: number) => void;
   size?: 'sm' | 'md' | 'lg';
-}> = ({ rating, onRate, size = 'md' }) => {
+  interactive?: boolean;
+}> = ({ rating, onRate, size = 'md', interactive = true }) => {
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-6 h-6',
     lg: 'w-8 h-8',
   };
-
   return (
     <div className="flex items-center space-x-1">
       {Array.from({ length: 5 }, (_, index) => (
         <Star
           key={index}
-          className={`${sizeClasses[size]} cursor-pointer transition-all duration-200 hover:scale-110 ${
+          className={`${sizeClasses[size]} transition-all duration-200 ${
+            interactive ? 'cursor-pointer hover:scale-110' : 'cursor-default'
+          } ${
             index < rating ? 'text-yellow-400 fill-yellow-400' : 'text-white/30 hover:text-yellow-400/50'
           }`}
-          onClick={() => onRate(index + 1)}
+          onClick={() => interactive && onRate(index + 1)}
         />
       ))}
     </div>
   );
 };
 
-// Main Dashboard component
-export default function Dashboard() {
-  const [error, setError] = useState<DashboardError>({
-    activeBeer: null,
-    reviews: null,
-    sensor: null,
-  });
-  const [selectedRating, setSelectedRating] = useState(0);
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  const [sensorData, setSensorData] = useState<Record<ProcessType, SensorData | undefined>>({
-    gaerung: undefined,
-    maischen: undefined,
-    hopfenkochen: undefined,
-  });
-  const [historicalData, setHistoricalData] = useState<Record<ProcessType, LiveData[] | undefined>>({
-    gaerung: undefined,
-    maischen: undefined,
-    hopfenkochen: undefined,
-  });
-  const [activeProcess, setActiveProcess] = useState<ProcessType>('gaerung');
+// Process Card Component
+const ProcessCard: React.FC<{
+  process: ProcessType;
+  data: SensorData | undefined;
+  historical: ChartDataPoint[] | undefined;
+  isActive: boolean;
+}> = ({ process, data, historical, isActive }) => {
+  const latestPoint = historical?.[historical?.length - 1];
+  const previousPoint = historical?.[historical?.length - 2];
 
-  const queryClient = useQueryClient();
+  const currentTemp = latestPoint ? getTemperatureValue(latestPoint) : (data ? getTemperatureValue(data) : 0);
+  const currentPressure = latestPoint ? getPressureValue(latestPoint) : (data ? getPressureValue(data) : 0);
+  const currentPh = latestPoint ? getPhValue(latestPoint) : (data ? getPhValue(data) : 0);
 
-  // Fetch active beer data
-  const {
-    data: activeBeerData,
-    error: activeBeerError,
-    isLoading: isBeerLoading,
-  } = useQuery<Beer | null>({
-    queryKey: ['active-beer'],
-    queryFn: async () => {
-      const response = await fetch('/api/beer/active');
-      if (!response.ok) {
-        throw new Error('Failed to fetch active beer');
-      }
-      const data = await response.json();
-      return data || null;
-    },
-    enabled: true,
-    refetchOnWindowFocus: false,
-    retry: 1,
-    staleTime: 5 * 60 * 1000,
-    onError: (error: unknown) => {
-      console.error('Error fetching active beer:', error);
-      setError(prev => ({ ...prev, activeBeer: error instanceof Error ? error : new Error('Failed to fetch active beer') }));
-    },
-  });
+  const previousTemp = previousPoint ? getTemperatureValue(previousPoint) : currentTemp;
+  const previousPressure = previousPoint ? getPressureValue(previousPoint) : currentPressure;
 
-  // Fetch reviews data
-  const {
-    data: reviewsData,
-    error: reviewsError,
-    isLoading: isReviewsLoading,
-  } = useQuery<ReviewsSummary | null>({
-    queryKey: ['reviews', activeBeerData?.name],
-    queryFn: async () => {
-      if (!activeBeerData?.name) {
-        return null;
-      }
-      const response = await fetch(`/api/review/${activeBeerData.name}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch reviews');
-      }
-      return await response.json();
-    },
-    enabled: !!activeBeerData?.name,
-    refetchOnWindowFocus: false,
-    retry: 1,
-    staleTime: 5 * 60 * 1000,
-    onError: (error: unknown) => {
-      console.error('Error fetching reviews:', error);
-      setError(prev => ({ ...prev, reviews: error instanceof Error ? error : new Error('Failed to fetch reviews') }));
-    },
-  });
+  const tempTrend = currentTemp - previousTemp;
+  const pressureTrend = currentPressure - previousPressure;
 
-  // Fetch sensor data
-  const fetchAllSensorData = useCallback(async () => {
-    const processes: ProcessType[] = ['gaerung', 'maischen', 'hopfenkochen'];
-    const newSensorData = {} as Record<ProcessType, SensorData | undefined>;
-    const newHistoricalData = {} as Record<ProcessType, LiveData[] | undefined>;
-    let hasError = false;
-
-    console.log('Starting data fetch for all processes');
-
-    for (const process of processes) {
-      try {
-        console.log(`Fetching data for process: ${process}`);
-
-        // Fetch current sensor data
-        const currentResponse = await fetch(`/api/sensor-data/${process}`);
-        if (!currentResponse.ok) {
-          console.error(`Sensor data request failed for ${process}:`, currentResponse.statusText);
-          throw new Error(`Failed to fetch sensor data for ${process}: ${currentResponse.statusText}`);
-        }
-        const currentData = await currentResponse.json();
-        console.log(`[${process}] Current sensor data:`, currentData);
-        newSensorData[process] = currentData;
-
-        // Fetch live data
-        const liveResponse = await fetch(`/api/live/${process}`);
-        if (!liveResponse.ok) {
-          console.error(`Live data request failed for ${process}:`, liveResponse.statusText);
-          throw new Error(`Failed to fetch live data for ${process}: ${liveResponse.statusText}`);
-        }
-        const liveData = await liveResponse.json();
-        console.log(`[${process}] Live data (last point):`, liveData[liveData.length - 1]);
-        newHistoricalData[process] = liveData;
-
-        // Log the values we're actually using
-        const latestPoint = liveData[liveData.length - 1];
-        const currentTemp = getTemperatureValue(latestPoint) || getTemperatureValue(currentData) || 0;
-        const currentPressure = getPressureValue(latestPoint) || getPressureValue(currentData) || 0;
-        const currentPh = getPhValue(latestPoint) || getPhValue(currentData) || 0;
-        console.log(`[${process}] Values used:`, {
-          temperature: currentTemp,
-          pressure: currentPressure,
-          ph: currentPh
-        });
-
-      } catch (error) {
-        console.error(`Error fetching data for ${process}:`, error);
-        hasError = true;
-        // Set previous data if fetch fails
-        newSensorData[process] = sensorData[process];
-        newHistoricalData[process] = historicalData[process];
-      }
+  const getStatusIcon = () => {
+    switch (data?.status) {
+      case 'online': return <CheckCircle className="w-4 h-4 text-green-400" />;
+      case 'warning': return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
+      case 'offline': return <Power className="w-4 h-4 text-red-400" />;
+      default: return <Clock className="w-4 h-4 text-gray-400" />;
     }
+  };
 
-    // Update state only if we have new data
-    if (Object.keys(newSensorData).length > 0) {
-      setSensorData(prev => ({ ...prev, ...newSensorData }));
-      setHistoricalData(prev => ({ ...prev, ...newHistoricalData }));
-      console.log('Updated sensor data:', newSensorData);
-      console.log('Updated historical data:', newHistoricalData);
-    }
-    
-    if (hasError) {
-      setError(prev => ({ ...prev, sensor: new Error('Failed to fetch sensor data') }));
-    }
-  }, []); // Removed dependencies to prevent infinite loops
-
-  useEffect(() => {
-    fetchAllSensorData();
-    const interval = setInterval(fetchAllSensorData, 10000);
-    return () => clearInterval(interval);
-  }, [fetchAllSensorData]);
-
-  // Cycle through active processes
-  useEffect(() => {
-    const processes: ProcessType[] = ['gaerung', 'maischen', 'hopfenkochen'];
-    let currentIndex = 0;
-
-    const interval = setInterval(() => {
-      currentIndex = (currentIndex + 1) % processes.length;
-      setActiveProcess(processes[currentIndex]);
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Submit review
-  const submitReview = useCallback(async () => {
-    if (!activeBeerData || selectedRating === 0) return;
-
-    setIsSubmittingReview(true);
-    try {
-      const response = await fetch(`/api/review/${activeBeerData.name}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sterne: selectedRating }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit review');
-      }
-
-      queryClient.invalidateQueries(['reviews', activeBeerData.name]);
-      setSelectedRating(0);
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      setError(prev => ({ ...prev, reviews: error instanceof Error ? error : new Error('Failed to submit review') }));
-      alert('Fehler beim Absenden der Bewertung. Bitte versuchen Sie es erneut.');
-    } finally {
-      setIsSubmittingReview(false);
-    }
-  }, [activeBeerData, selectedRating, queryClient]);
+  const customTooltipStyles = {
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '8px',
+    padding: '12px',
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-800 p-6">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-      </div>
+    <div
+      className={`group relative overflow-hidden rounded-3xl backdrop-blur-xl border border-white/20 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl ${
+        isActive
+          ? 'bg-gradient-to-br from-white/30 to-white/10 shadow-xl ring-2 ring-white/30'
+          : 'bg-gradient-to-br from-white/15 to-white/5 hover:from-white/25 hover:to-white/15'
+      }`}
+    >
+      <div
+        className={`absolute inset-0 bg-gradient-to-br ${processColors[process]} opacity-10 group-hover:opacity-20 transition-opacity duration-500`}
+      />
 
-      <div className="relative z-10 max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-white via-white to-white/70 bg-clip-text text-transparent mb-4">
-            Brauerei-Dashboard
-          </h1>
-          <p className="text-white/60 text-lg">Echtzeitüberwachung und Analysen</p>
-        </div>
-
-        {error.activeBeer || error.reviews || error.sensor ? (
-          <div className="mb-6 p-4 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30">
-            {error.activeBeer && <p>Error fetching active beer: {error.activeBeer.message}</p>}
-            {error.reviews && <p>Error fetching reviews: {error.reviews.message}</p>}
-            {error.sensor && <p>Error fetching sensor data: {error.sensor.message}</p>}
-          </div>
-        ) : null}
-
-        <div className="mb-12">
-          <div className="relative overflow-hidden rounded-3xl backdrop-blur-xl bg-gradient-to-br from-white/20 to-white/5 border border-white/20 shadow-2xl">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/20 via-orange-500/20 to-red-500/20 animate-pulse" />
-            <div className="relative p-8">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center space-x-6">
-                  <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white shadow-xl">
-                    <Award className="w-8 h-8" />
-                  </div>
-                  <div>
-                    <h2 className="text-3xl font-bold text-white mb-2">Aktuelles Bier</h2>
-                    {isBeerLoading ? (
-                      <p className="text-white/60 text-lg">Lade aktuelles Bier...</p>
-                    ) : activeBeerData ? (
-                      <div className="space-y-1">
-                        <h3 className="text-2xl font-semibold text-white/90">{activeBeerData.name}</h3>
-                        <p className="text-white/60 text-lg">{activeBeerData.type}</p>
-                      </div>
-                    ) : (
-                      <p className="text-white/60 text-lg">Kein aktuelles Bier gefunden</p>
-                    )}
-                  </div>
-                </div>
-                {activeBeerData && (
-                  <div className="text-center">
-                    <div className="flex items-center justify-center space-x-2 mb-2">
-                      <span className="text-4xl font-bold text-white">{reviewsData?.durchschnitt || 0}</span>
-                      <StarRating rating={Math.floor(reviewsData?.durchschnitt || 0)} onRate={() => {}} size="lg" />
-                    </div>
-                    <p className="text-white/60">{reviewsData?.anzahl || 0} Bewertungen</p>
-                  </div>
-                )}
+      <div className="relative p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <div className={`p-3 rounded-2xl bg-gradient-to-br ${processColors[process]} text-white shadow-lg`}>
+              {processIcons[process]}
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white/90">{processNames[process]}</h3>
+              <div className="flex items-center space-x-2 mt-1">
+                {getStatusIcon()}
+                <span className="text-white/60 text-sm">
+                  {data?.lastUpdate ? formatTime(data.lastUpdate) : 'Keine Daten'}
+                </span>
               </div>
-              {activeBeerData && (
-                <div className="flex items-center justify-between p-6 rounded-2xl bg-black/20 backdrop-blur-sm border border-white/10">
-                  <div className="flex items-center space-x-6">
-                    <span className="text-white/80 font-medium">Bewerte dieses Bier:</span>
-                    <StarRating rating={selectedRating} onRate={setSelectedRating} size="lg" />
-                  </div>
-                  <button
-                    onClick={submitReview}
-                    disabled={isSubmittingReview || selectedRating === 0}
-                    className={`px-8 py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 ${
-                      isSubmittingReview || selectedRating === 0
-                        ? 'bg-white/20 text-white/50 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg hover:shadow-xl'
-                    }`}
-                  >
-                    {isSubmittingReview ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Absenden...</span>
-                      </div>
-                    ) : (
-                      'Bewertung absenden'
-                    )}
-                  </button>
-                </div>
-              )}
             </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className={`w-3 h-3 rounded-full ${
+              isActive ? 'bg-green-400 animate-pulse' : 'bg-gray-500'
+            } shadow-lg`} />
+            <Settings className="w-4 h-4 text-white/40 hover:text-white/80 cursor-pointer transition-colors" />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {Object.entries(historicalData).map(([process, data]) => (
-            <ProcessCard
-              key={process}
-              process={process as ProcessType}
-              data={sensorData[process as ProcessType]}
-              historical={data}
-              isActive={activeProcess === process}
-            />
-          ))}
-        </div>
-
-        <div className="mt-12 flex items-center justify-center">
-          <div className="flex items-center space-x-8 px-8 py-4 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-              <span className="text-white/80 text-sm">System Online</span>
+        {/* Metrics Grid */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="bg-black/20 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex items-center space-x-2 mb-2">
+              <Thermometer className="w-4 h-4 text-red-400" />
+              <span className="text-white/70 text-sm">Temperatur</span>
             </div>
-            <div className="w-px h-6 bg-white/20" />
-            <div className="flex items-center space-x-2">
+            <div className="flex items-baseline space-x-1">
+              <span className="text-2xl font-bold text-white">{currentTemp}</span>
+              <span className="text-white/60 text-sm">°C</span>
+            </div>
+            <div className={`flex items-center text-xs mt-1 ${
+              tempTrend > 0 ? 'text-green-400' : tempTrend < 0 ? 'text-red-400' : 'text-gray-400'
+            }`}>
+              <TrendingUp className={`w-3 h-3 mr-1 ${tempTrend < 0 ? 'rotate-180' : ''}`} />
+              <span>{Math.abs(tempTrend).toFixed(1)}</span>
+            </div>
+          </div>
+
+          <div className="bg-black/20 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex items-center space-x-2 mb-2">
               <Activity className="w-4 h-4 text-blue-400" />
-              <span className="text-white/80 text-sm">Alle Sensoren Aktiv</span>
+              <span className="text-white/70 text-sm">Druck</span>
             </div>
-            <div className="w-px h-6 bg-white/20" />
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="w-4 h-4 text-green-400" />
-              <span className="text-white/80 text-sm">Optimale Leistung</span>
+            <div className="flex items-baseline space-x-1">
+              <span className="text-2xl font-bold text-white">{currentPressure}</span>
+              <span className="text-white/60 text-sm">bar</span>
+            </div>
+            <div className={`flex items-center text-xs mt-1 ${
+              pressureTrend > 0 ? 'text-green-400' : pressureTrend < 0 ? 'text-red-400' : 'text-gray-400'
+            }`}>
+              <TrendingUp className={`w-3 h-3 mr-1 ${pressureTrend < 0 ? 'rotate-180' : ''}`} />
+              <span>{Math.abs(pressureTrend).toFixed(2)}</span>
             </div>
           </div>
+
+          <div className="bg-black/20 rounded-xl p-4 backdrop-blur-sm">
+            <div className="flex items-center space-x-2 mb-2">
+              <BarChart3 className="w-4 h-4 text-purple-400" />
+              <span className="text-white/70 text-sm">pH-Wert</span>
+            </div>
+            <div className="flex items-baseline space-x-1">
+              <span className="text-2xl font-bold text-white">{currentPh}</span>
+            </div>
+            <div className="w-full h-2 bg-white/20 rounded-full mt-2 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-green-400 to-blue-400 rounded-full transition-all duration-1000"
+                style={{ width: `${Math.min(100, (currentPh / 7) * 100)}%` }}
+              />
+            </div>
+          </div>
+        </div>
+        {/* Chart */}
+        <div className="h-40 rounded-2xl overflow-hidden bg-black/20 backdrop-blur-sm p-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={historical?.slice(-20) || []}>
+              <defs>
+                <linearGradient id={`temp-gradient-${process}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#ef4444" stopOpacity={0.1} />
+                </linearGradient>
+                <linearGradient id={`pressure-gradient-${process}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
+                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.1} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+              <XAxis
+                dataKey="time"
+                tickFormatter={(value) => new Date(value).toLocaleTimeString('de-DE', {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+                stroke="#ffffff60"
+                fontSize={10}
+              />
+              <YAxis stroke="#ffffff60" fontSize={10} />
+              <Tooltip
+                contentStyle={customTooltipStyles}
+                labelFormatter={(value) => formatTime(value)}
+                formatter={(value: any, name: string) => [
+                  typeof value === 'number' ? value.toFixed(2) : value,
+                  name === 'temperature' ? 'Temperatur (°C)' :
+                  name === 'pressure' ? 'Druck (bar)' : 'pH-Wert'
+                ]}
+              />
+              <Line
+                type="monotone"
+                dataKey="temperature"
+                stroke="#ef4444"
+                strokeWidth={2}
+                fill={`url(#temp-gradient-${process})`}
+                dot={false}
+                name="temperature"
+                key={`line-temperature-${process}`}
+              />
+              <Line
+                type="monotone"
+                dataKey="pressure"
+                stroke="#3b82f6"
+                strokeWidth={2}
+                fill={`url(#pressure-gradient-${process})`}
+                dot={false}
+                name="pressure"
+                key={`line-pressure-${process}`}
+              />
+              <Line
+                type="monotone"
+                dataKey="ph"
+                stroke="#a855f7"
+                strokeWidth={2}
+                dot={false}
+                name="ph"
+                key={`line-ph-${process}`}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export {
+  MockDataGenerator,
+  ProcessCard,
+  StarRating,
+  formatTime,
+  getTemperatureValue,
+  getPressureValue,
+  getPhValue,
+  processNames,
+  processIcons,
+  processColors
+};
