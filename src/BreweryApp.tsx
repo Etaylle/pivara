@@ -6,7 +6,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  Legend
 } from 'recharts';
 import {
   Star, Award, Activity, TrendingUp, Droplets, Zap, Thermometer,
@@ -363,71 +364,98 @@ const ProcessCard: React.FC<{
             </div>
           </div>
         </div>
-        {/* Chart */}
+        {/* Chart  */}
         <div className="h-40 rounded-2xl overflow-hidden bg-black/20 backdrop-blur-sm p-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={historical?.slice(-20) || []}>
-              <defs>
-                <linearGradient id={`temp-gradient-${process}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
-                  <stop offset="100%" stopColor="#ef4444" stopOpacity={0.1} />
-                </linearGradient>
-                <linearGradient id={`pressure-gradient-${process}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
-                  <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.1} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-              <XAxis
-                dataKey="time"
-                tickFormatter={(value) => new Date(value).toLocaleTimeString('de-DE', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-                stroke="#ffffff60"
-                fontSize={10}
-              />
-              <YAxis stroke="#ffffff60" fontSize={10} />
-              <Tooltip
-                contentStyle={customTooltipStyles}
-                labelFormatter={(value) => formatTime(value)}
-                formatter={(value: any, name: string) => [
-                  typeof value === 'number' ? value.toFixed(2) : value,
-                  name === 'temperature' ? 'Temperatur (°C)' :
-                  name === 'pressure' ? 'Druck (bar)' : 'pH-Wert'
-                ]}
-              />
-              <Line
-                type="monotone"
-                dataKey="temperature"
-                stroke="#ef4444"
-                strokeWidth={2}
-                fill={`url(#temp-gradient-${process})`}
-                dot={false}
-                name="temperature"
-                key={`line-temperature-${process}`}
-              />
-              <Line
-                type="monotone"
-                dataKey="pressure"
-                stroke="#3b82f6"
-                strokeWidth={2}
-                fill={`url(#pressure-gradient-${process})`}
-                dot={false}
-                name="pressure"
-                key={`line-pressure-${process}`}
-              />
-              <Line
-                type="monotone"
-                dataKey="ph"
-                stroke="#a855f7"
-                strokeWidth={2}
-                dot={false}
-                name="ph"
-                key={`line-ph-${process}`}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height="100%">
+  {(historical && historical.length > 0) ? (
+    <LineChart data={historical.slice(-20)}>
+      <defs>
+        <linearGradient id={`temp-gradient-${process}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#ef4444" stopOpacity={0.8} />
+          <stop offset="100%" stopColor="#ef4444" stopOpacity={0.1} />
+        </linearGradient>
+        <linearGradient id={`pressure-gradient-${process}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
+          <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.1} />
+        </linearGradient>
+      </defs>
+      <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+      <XAxis
+        dataKey="time"
+        tickFormatter={(value) =>
+          new Date(value).toLocaleTimeString('de-DE', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        }
+        stroke="#ffffff60"
+        fontSize={10}
+      />
+      <YAxis stroke="#ffffff60" fontSize={10} />
+      <Tooltip
+        contentStyle={customTooltipStyles}
+        labelFormatter={(value) => formatTime(value)}
+        formatter={(value: any, name: string) => [
+          typeof value === 'number' ? value.toFixed(2) : value,
+          name === 'temperature'
+            ? 'Temperatur (°C)'
+            : name === 'pressure'
+            ? 'Druck (bar)'
+            : 'pH-Wert'
+        ]}
+      />
+      <Legend />
+      <Line
+        type="monotone"
+        dataKey="temperature"
+        stroke="#ef4444"
+        strokeWidth={2}
+        fill={`url(#temp-gradient-${process})`}
+        dot={false}
+        name="Temperatur (°C)"
+        key={`line-temperature-${process}`}
+      />
+      <Line
+        type="monotone"
+        dataKey="pressure"
+        stroke="#3b82f6"
+        strokeWidth={2}
+        fill={`url(#pressure-gradient-${process})`}
+        dot={false}
+        name="Druck (bar)"
+        key={`line-pressure-${process}`}
+      />
+      <Line
+        type="monotone"
+        dataKey="ph"
+        stroke="#a855f7"
+        strokeWidth={2}
+        dot={false}
+        name="pH-Wert"
+        key={`line-ph-${process}`}
+      />
+    </LineChart>
+  ) : (
+    <div
+      style={{
+        color: "#fff",
+        textAlign: "center",
+        paddingTop: 60,
+        opacity: 0.6,
+        fontSize: 16,
+        background: "rgba(0,0,0,0.2)",
+        borderRadius: 16,
+        width: "100%",
+        height: "100%",
+      }}
+    >
+      Keine Daten verfügbar
+    </div>
+  )}
+</ResponsiveContainer>
+
+
+
         </div>
       </div>
     </div>
